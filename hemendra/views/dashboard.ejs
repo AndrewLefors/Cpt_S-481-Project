@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Dashboard - <%= username %></title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<div class="sidebar">
+		<h2>Welcome, <%= username %></h2>
+		<ul>
+			<li><a href="#">Home</a></li>
+			<li><a href="/taskview">Tasks</a></li>
+			<li><a href="#">TBD</a></li>
+			<li><a href="#">TBD</a></li>
+			<li><a href="/logout">Logout</a></li>
+		</ul>
+	</div>
+
+	<div class="content">
+		<h1>Tasks</h1>
+		<table>
+			<tr>
+				<th>Task Name</th>
+				<th>Description</th>
+				<th>Due Date</th>
+			</tr>
+			<% for (let i = 0; i < tasks.length; i++) { %>
+				<tr>
+					<td><%= tasks[i].task %></td>
+                    <td><%= tasks[i].description %></td>
+					<td><%= tasks[i].due_date %></td>
+				</tr>
+			<% } %>
+		</table>
+	</div>
+</body>
+</html>
+
