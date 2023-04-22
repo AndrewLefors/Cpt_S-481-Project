@@ -12,11 +12,11 @@ app.use(express.static('public'));
 const db = new sqlite3.Database(':memory:');
 
 db.serialize(() => {
-  db.run('CREATE TABLE users (username TEXT, password TEXT, role INTEGER)');
-  db.run(`INSERT INTO users (username, password,role) VALUES 
-    ('alice', '${bcrypt.hashSync('password123', saltRounds)}', '0'), 
-    ('bob', '${bcrypt.hashSync('abc123', saltRounds)}', '1'),
-    ('charlie', '${bcrypt.hashSync('secret', saltRounds)}', '2')`);
+  db.run('CREATE TABLE users (username TEXT, password TEXT, role INTEGER,supervisor TEXT,department TEXT,team TEXT,email TEXT,designation TEXT)');
+  db.run(`INSERT INTO users (username, password,role,supervisor,department,team,email,designation) VALUES 
+    ('alice', '${bcrypt.hashSync('password123', saltRounds)}', '0','bob','IT','team2','alice@wsu.edu','tech assistant'), 
+    ('bob', '${bcrypt.hashSync('abc123', saltRounds)}', '1','charlie','IT','team5','bob@wsu.edu','tech manager'),
+    ('charlie', '${bcrypt.hashSync('secret', saltRounds)}', '2','','IT','','charlie@wsu.edu','Department Head')`);
 
   db.run('CREATE TABLE tasks (task TEXT, due_date TEXT, username TEXT, description TEXT,status TEXT,assignedby TEXT)');
   db.run(`INSERT INTO tasks (task, due_date, username, description,status,assignedby) VALUES 
@@ -239,6 +239,30 @@ app.post('/addtask', (req, res) => {
   });
 });
 
+app.get('/directory', (req, res) => {
+  const { username } = req.session;
+  if (!username) {
+    res.redirect('/');
+  } else {
+    db.all('SELECT * FROM users', (err, rows) => {
+      if (err) {
+        console.error(err.message);
+        res.status(500).send('Internal Server Error');
+      } else {
+        const users = rows.map(row => ({
+          name:row.username,
+          department:row.department,
+          team:row.team,
+          email:row.email,
+          Level:row.role,
+          designation:row.designation 
+        }));
+        res.render('directory', { username, users });
+      }
+    });
+  }
+});
+
 app.post('/changestatus',(req,res)=>{
   const { username } = req.session;
   const { taskid,status} = req.body;
@@ -253,6 +277,38 @@ app.post('/changestatus',(req,res)=>{
         }
       });
 
+
+});
+
+app.post('/filter',(req,res)=>{
+  const { username } = req.session;
+  const { keyword} = req.body;
+ 
+  db.all('SELECT * FROM users WHERE username LIKE ? OR team LIKE ? OR department LIKE ? OR email LIKE ? OR role LIKE ? OR designation LIKE ?', [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`, `%${keyword}%`, `%${keyword}%`, `%${keyword}%`],
+         (err,rows) => {
+        if (err) {
+          console.error(err.message);
+          res.status(500).send('Internal Server Error');
+        } else if (rows.length) {
+          console.log(rows);
+          const users = rows.map(row => ({
+          name:row.username,
+          department:row.department,
+          team:row.team,
+          email:row.email,
+          Level:row.role,
+          designation:row.designation 
+        }));
+        res.render('directory', { username, users });
+         
+        }
+        else
+        {
+          res.redirect('/directory');
+        }
+      });
+    
+    
 
 });
 
