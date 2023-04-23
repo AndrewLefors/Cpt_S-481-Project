@@ -22,7 +22,7 @@ db.serialize(() => {
   db.run(`INSERT INTO tasks (task, due_date, username, description,status,assignedby) VALUES 
   ('Task 1', '2023-04-30', 'alice', 'Wash All Dishes with Detergent.','inprogress','alice'),
   ('Task 7', '2023-04-30', 'bob', 'Bring clothes back','inprogress','bob'),
-  ('Task 2', '2023-05-15', 'alice', 'Dry Dishes on Holding Rack','todo','alice'),
+  ('Task 2', '2023-05-15', 'alice', 'Dry Dishes on Holding Rack','need-approval','bob'),
   ('Task 3', '2023-05-01', 'bob', 'Supervise Alice','todo','bob')`);
 
 });
@@ -266,8 +266,8 @@ app.get('/directory', (req, res) => {
 app.post('/changestatus',(req,res)=>{
   const { username } = req.session;
   const { taskid,status} = req.body;
-
-  db.run(`UPDATE tasks SET status = ? WHERE task = ? AND username = ?`,
+ if(!status=="completed")
+ { db.run(`UPDATE tasks SET status = ? WHERE task = ? AND username = ?`,
         [status, taskid, username], (err) => {
         if (err) {
           console.error(err.message);
@@ -276,8 +276,21 @@ app.post('/changestatus',(req,res)=>{
           res.redirect('/taskview');
         }
       });
-
-
+ }
+ else
+{
+  db.run(`UPDATE tasks SET status = ? WHERE task = ? AND ((status=? AND assignedby= ?) OR username=?)`,
+      [status, taskid,"need-approval",username,username], (err) => {
+      if (err) {
+        console.error(err.message);
+        res.status(500).send('Internal Server Error');
+      } else {
+        res.redirect('/taskview');
+      }
+    });
+  
+  
+  }
 });
 
 app.post('/filter',(req,res)=>{
