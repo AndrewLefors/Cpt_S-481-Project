@@ -4,6 +4,8 @@ const bodyparser = require('body-parser');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const session = require('express-session');
+const now = new Date();
+const isoDateTime = now.toISOString().slice(0, 19).replace('T', ' '); // returns a string in ISO 8601 format
 
 const app = express();
 app.use(bodyparser.urlencoded({ extended: true }));
@@ -24,6 +26,9 @@ db.serialize(() => {
   ('Task 7', '2023-04-30', 'bob', 'Bring clothes back','inprogress','bob'),
   ('Task 2', '2023-05-15', 'alice', 'Dry Dishes on Holding Rack','need-approval','bob'),
   ('Task 3', '2023-05-01', 'bob', 'Supervise Alice','todo','bob')`);
+
+  db.run('CREATE TABLE messages (sender TEXT, receiver TEXT,content TEXT,time DATETIME)');
+  
 
 });
 
@@ -340,6 +345,47 @@ app.post('/delete',(req,res)=>
       });
   
   
+});
+
+app.get('/message', (req, res) => {
+  const { username } = req.session;
+  if (!username) {
+    res.redirect('/');
+  } else {
+    db.all('SELECT * FROM messages WHERE sender=? OR receiver=?',[username,username], (err, rows) => {
+      if (err) {
+        console.error(err.message);
+        res.status(500).send('Internal Server Error');
+      } else {
+        const messages = rows.map(row => ({
+          sender:row.sender,
+          receiver:row.receiver,
+          content:row.content,
+          time:row.time,
+           
+        }));
+        messages.reverse()
+        
+        res.render('message', {username, messages});
+      }
+    });
+  }
+});
+
+app.post('/sendmessage',(req,res)=>
+{ const {receiver,message} = req.body;
+  const { username } = req.session;
+
+  db.run(`INSERT INTO messages (sender, receiver,content,time) 
+                VALUES ('${username}', '${receiver}', '${message}', '${isoDateTime}')`, (err) => {
+                if (err) {
+                  res.redirect('/message');
+                } else {
+                  res.redirect('/message');
+                }
+              });
+
+
 });
 
 app.get('/logout', (req, res) => {
