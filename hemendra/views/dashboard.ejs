@@ -1,38 +1,60 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>Dashboard - <%= username %></title>
-	<link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-	<div class="sidebar">
-		<h2>Welcome, <%= username %></h2>
-		<ul>
-			<li><a href="/dashboard">Home</a></li>
-			<li><a href="/taskview">Tasks</a></li>
-			<li><a href="/directory">Employee Directory</a></li>
-			<li><a href="/message">Message</a></li>
-			<li><a href="/logout">Logout</a></li>
-		</ul>
-	</div>
+	<head> 
+		<div class="top-header"> <!-- added top-header div -->
+			<div class="header-left"> <!-- added header-left div -->
+				<img src="bell-icon.png" alt="Notification Bell Icon">
+			</div>
+			<div class="header-right"> <!-- added header-right div -->
+				<img src="profile-pic.png" alt="Profile Picture">
+			</div>
+		</div>
+		<div class="sidebar">
+			<h2>Welcome, <%= username %></h2>
+			<ul>
+				<li><a href="/dashboard">Home</a></li>
+				<li><a href="/taskview">Tasks</a></li>
+				<li><a href="/directory">Employee Directory</a></li>
+				<li><a href="#">TBD</a></li>
+				<li><a href="/logout">Logout</a></li>
+			</ul>
+		</div>
 
-	<div class="content">
-		<h1>Tasks</h1>
-		<table>
-			<tr>
-				<th>Task Name</th>
-				<th>Description</th>
-				<th>Due Date</th>
-			</tr>
-			<% for (let i = 0; i < tasks.length; i++) { %>
+		<title>Dashboard - <%= username %></title>
+		<link rel="stylesheet" type="text/css" href="style.css">
+		
+	</head>
+	<body>
+		<div class="content">
+			<h1>Tasks</h1>
+			<table>
 				<tr>
-					<td><%= tasks[i].task %></td>
-                    <td><%= tasks[i].description %></td>
-					<td><%= tasks[i].due_date %></td>
+					<th>Task Name</th>
+					<th>Description</th>
+					<th>Due Date</th>
 				</tr>
-			<% } %>
-		</table>
-	</div>
-</body>
+				<% for (let i = 0; i < topTasks.length; i++) { %>
+					<tr>
+						<td><%= topTasks[i].task %></td>
+						<td><%= topTasks[i].description %></td>
+						<td><%= topTasks[i].due_date %></td>
+					</tr>
+				<% } %>
+			</table>
+			<table>
+				<tr>
+					<th>Task Type</th>
+					<th>Count</th>
+				</tr>
+				<% for (let key in taskCounts) { %>
+					<tr>
+						<td><%= key %></td>
+						<td><%= taskCounts[key] %></td>
+					</tr>
+				<% } %>
+			</table>
+		</div>
+	</body>
 </html>
+
 

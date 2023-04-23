@@ -76,22 +76,36 @@ app.get('/dashboard', (req, res) => {
   if (!username) {
     res.redirect('/');
   } else {
-    db.all('SELECT * FROM tasks WHERE username = ?', [username], (err, rows) => {
+    db.all(`SELECT * FROM tasks WHERE username = ? ORDER BY due_date LIMIT 10`, [username], (err, rows) => {
       if (err) {
         console.error(err.message);
         res.status(500).send('Internal Server Error');
       } else {
-        const tasks = rows.map(row => ({
+        const topTasks = rows.map(row => ({
           task: row.task,
           description: row.description,
           due_date: row.due_date,
           status: row.status
         }));
-        res.render('dashboard', { username, tasks });
+
+        db.all(`SELECT status, COUNT(*) as count FROM tasks WHERE username = ? GROUP BY status`, [username], (err, rows) => {
+          if (err) {
+            console.error(err.message);
+            res.status(500).send('Internal Server Error');
+          } else {
+            const taskCounts = {};
+            rows.forEach(row => {
+              taskCounts[row.status] = row.count;
+            });
+
+            res.render('dashboard', { username, topTasks, taskCounts });
+          }
+        });
       }
     });
   }
 });
+
 app.get('/taskview', (req, res) => {
   const { username } = req.session;
   if (!username) {

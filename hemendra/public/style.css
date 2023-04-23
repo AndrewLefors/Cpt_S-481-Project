@@ -4,9 +4,27 @@ body {
 	font-family: Arial, sans-serif;
 }
 
+.top-header { /* added top-header styles */
+	background-color: #ccc;
+	display: flex;
+	justify-content: space-between;
+	padding: 10px 20px;
+	box-sizing: border-box;
+}
+
+.header-left { /* added header-left styles */
+	display: flex;
+	align-items: center;
+}
+
+.header-right { /* added header-right styles */
+	display: flex;
+	align-items: center;
+}
+
 .sidebar {
 	position: fixed;
-	top: 0;
+	top: 0px; /* changed the top value to 50px to accommodate the top-header */
 	left: 0;
 	width: 250px;
 	height: 100%;
@@ -105,7 +123,8 @@ table th {
 	position: relative;
 }
 
-.graph h3 {
+.graph h3
+{
 	margin-top: 0;
 	margin-bottom: 10px;
 }
@@ -218,3 +237,4 @@ table th {
 .login-card button:hover {
 	background-color: #6f1624;
 }
+
