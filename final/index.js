@@ -402,6 +402,40 @@ app.post('/sendmessage',(req,res)=>
 
 });
 
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+
+app.post('/register', (req, res) => {
+  const { username, password } = req.body;
+
+  db.get('SELECT username FROM users WHERE username = ?', [username], (err, row) => {
+    if (err) {
+      console.error(err.message);
+      res.status(500).send('Internal Server Error');
+    } else if (row) {
+      res.status(409).send('Username already exists');
+    } else {
+      bcrypt.hash(password, saltRounds, (err, hash) => {
+        if (err) {
+          console.error(err.message);
+          res.status(500).send('Internal Server Error');
+        } else {
+          db.run(`INSERT INTO users (username, password, role, supervisor, department, team, email, designation) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [username, hash, 0, '', '', '', '', ''], (err) => {
+              if (err) {
+                console.error(err.message);
+                res.status(500).send('Internal Server Error');
+              } else {
+                res.redirect('/');
+              }
+            });
+        }
+      });
+    }
+  });
+});
+
 app.get('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
